@@ -31,7 +31,7 @@ On each example the result of operation comes after `=>`
 
 - Query:
 ```
-getPost({"id":"3"}) => {"data":{"post":{"id":"3","title":"Post title 3","content":"Post content 3","__typename":"Post"}}}
+getPost({"id":"3"}) => {"data":{"post":{"id":"3","title":"Post title 3", "__typename":"Post"}}}
 ```
 
 - Mutation:
@@ -46,7 +46,7 @@ onCountUpdated({}) => subscription: 2
 
 - Subscription message:
 ```
-{"commentUpdated":{"mutation":"CREATED","id":"3003","postId":"3","node":{"id":"3003","content":"Post comment 3","__typename":"Comment"},"__typename":"UpdateCommentPayload"}}
+{"commentUpdated":{"mutation":"CREATED","id":"3003", ... ,"__typename":"UpdateCommentPayload"}}
 ```
 
 - Unsubscription
@@ -72,13 +72,13 @@ pubsub unsubscribe [ 2 ]
 
 - PubSub message generated on a server:
 ```
-pubsub msg postsUpdated({"mutation":"CREATED","id":21,"node":{"id":21,"title":"New post 1","content":"New post content 1"}})
+pubsub msg postsUpdated({"mutation":"CREATED","id":21,"node":{"id":21,"title":"New post 1"}})
 ```
 
 - PubSub filter check on a server:
 ```
-pubsub filter postsUpdated(opts = {"query":"subscription onPostUpdated($endCursor: ID!) {\n  postsUpdated(endCursor: $endCursor) {\n    mutation\n    node {\n      ...PostInfo\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PostInfo on Post {\n  id\n  title\n  content\n  __typename\n}\n","variables":{"endCursor":10},"context":{}}, args = {"endCursor":10}, name = postsUpdated)
-.postsUpdated(val = {"mutation":"CREATED","id":21,"node":{"id":21,"title":"New post 1","content":"New post content 1"}}, ctx = {}) => true
+pubsub filter postsUpdated(opts = {"query":...,"context":{}}, args = {"endCursor":10}, name = postsUpdated)
+.postsUpdated(val = {"mutation":"CREATED","id":21,"node":{"id":21,"title":"New post 1"}}, ctx = {}) => true
 ```
 
 ## License
