@@ -1,0 +1,24 @@
+{
+  "name": "apollo-logger",
+  "version": "0.0.1",
+  "description": "Apollo GraphQL Logger",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sysgears/apollo-logger.git"
+  },
+  "keywords": [
+    "apollo",
+    "graphql",
+    "log"
+  ],
+  "author": "Victor Vlasenko <victor.vlasenko@sysgears.com> (https://github.com/sysgears)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sysgears/apollo-logger/issues"
+  },
+  "homepage": "https://github.com/sysgears/apollo-logger"
+}
