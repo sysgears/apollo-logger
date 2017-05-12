@@ -1,6 +1,6 @@
 {
   "name": "apollo-logger",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Apollo GraphQL Logger",
   "main": "lib/index.js",
   "scripts": {
