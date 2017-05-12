@@ -2,8 +2,11 @@
   "name": "apollo-logger",
   "version": "0.0.1",
   "description": "Apollo GraphQL Logger",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint 'src/*.ts*' -p tsconfig.json --type-check && tslint 'test/*.ts*' -p tsconfig.json --type-check",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,8 +20,19 @@
   ],
   "author": "Victor Vlasenko <victor.vlasenko@sysgears.com> (https://github.com/sysgears)",
   "license": "MIT",
+  "files": [
+    "lib",
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
   "bugs": {
     "url": "https://github.com/sysgears/apollo-logger/issues"
   },
-  "homepage": "https://github.com/sysgears/apollo-logger"
+  "homepage": "https://github.com/sysgears/apollo-logger",
+  "devDependencies": {
+    "@types/node": "^7.0.18",
+    "tslint": "^5.2.0",
+    "typescript": "^2.3.2"
+  }
 }
