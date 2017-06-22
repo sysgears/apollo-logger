@@ -22,7 +22,7 @@ const addNetworkInterfaceLogger = netIfc => {
       try {
         const logHandler = (err, res) => {
           if (apolloLogging) {
-            console.log(JSON.stringify(err ? err : res));
+            console.log(err ? "error caught: " + JSON.stringify(err) : JSON.stringify(res));
           }
           return handler(err, res);
         };
@@ -64,6 +64,30 @@ const addPubSubLogging = pubsub => ({
     console.log('pubsub unsubscribe', args);
     return pubsub.unsubscribe(...args);
   },
+  asyncIterator(...args) {
+    const asyncIter = pubsub.asyncIterator(...args);
+    const trigger = args[0];
+    return Object.assign({}, asyncIter, {
+      async next() {
+        let result;
+        try {
+          result = await asyncIter.next();
+        } finally {
+          if (apolloLogging) { console.log(trigger + "->next =>", JSON.stringify(result)); }
+        }
+        return result;
+      },
+      throw(error) {
+        let result;
+        try {
+          result = asyncIter.throw(error);
+        } finally {
+          if (apolloLogging) { console.log(trigger + `->throw("${JSON.stringify(error)}") =>`, JSON.stringify(result)); }
+        }
+        return result;
+      }
+    });
+  }
 });
 
 const addSubscriptionManagerLogger = manager => {
