@@ -1,13 +1,16 @@
 {
   "name": "apollo-logger",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Apollo GraphQL Logger",
   "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "scripts": {
+    "clean": "rm -rf ./lib",
     "compile": "tsc",
     "watch": "tsc -w",
     "lint": "tslint 'src/*.ts*' -p tsconfig.json --type-check && tslint 'test/*.ts*' -p tsconfig.json --type-check",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "npm run clean && npm run compile"
   },
   "repository": {
     "type": "git",
