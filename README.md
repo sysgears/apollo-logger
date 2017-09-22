@@ -11,20 +11,18 @@ npm install --save-dev apollo-logger
 ## Usage
 
 For full logging you will need to attach Apollo Logger to:
-- Network interface
-- Subscription manager 
+- Apollo Link
 - And PubSub
 
 ``` js
-import { addApolloLogging } from 'apollo-logger';
+import { LoggingLink, addApolloLogging } from 'apollo-logger';
 
-let networkInterface = addApolloLogging(createBatchingNetworkInterface({
-  ...
-}));
+const link = ApolloLink.from([
+  new LoggingLink(),
+  new HttpLink({uri: ...})
+);
 
 const pubsub = addApolloLogging(new PubSub());
-
-const subscriptionManager = addApolloLogging(new SubscriptionManager(...));
 ```
 
 ## Sample output
@@ -33,27 +31,27 @@ On each example the result of operation comes after `=>`
 
 - Query:
 ``` js
-getPost({"id":"3"}) => {"data":{"post":{"id":"3","title":"Post title 3", "__typename":"Post"}}}
+{"data":{"post":{"id":20,"title":"Post title 20","content":"Post content 20","__typename":"Post","comments":[{"id":39,"content":"Comment title 1 for post 20","__typename":"Comment"},{"id":40,"content":"Comment title 2 for post 20","__typename":"Comment"}]}}} <= post({"id":"20"})
 ```
 
 - Mutation:
 ``` js
-addCount({"amount":1}) => {"data":{"addCount":{"amount":17,"__typename":"Count"}}}
+{"data":{"addCounter":{"amount":21,"__typename":"Counter"}}} <= addCounter({"amount":1})
 ```
 
 - Subscription
 ``` js
-onCountUpdated({}) => subscription: 2
+subscribe <= onPostUpdated({"endCursor":11})
 ```
 
 - Subscription message:
 ``` js
-{"commentUpdated":{"mutation":"CREATED","id":"3003", ... ,"__typename":"UpdateCommentPayload"}}
+{"data":{"counterUpdated":{"amount":21,"__typename":"Counter"}}} <= onCounterUpdated
 ```
 
 - Unsubscription
 ``` js
-unsubscribe from subscription: 2
+unsubscribe <= onPostUpdated({"endCursor":11})
 ```
 
 - PubSub publish on a server:
@@ -75,12 +73,6 @@ pubsub unsubscribe [ 2 ]
 - PubSub message generated on a server:
 ``` js
 pubsub msg postsUpdated({"mutation":"CREATED","id":21,"node":{"id":21,"title":"New post 1"}})
-```
-
-- PubSub filter check on a server:
-``` js
-pubsub filter postsUpdated(opts = {"query":...,"context":{}}, args = {"endCursor":10}, name = postsUpdated)
-.postsUpdated(val = {"mutation":"CREATED","id":21,"node":{"id":21,"title":"New post 1"}}, ctx = {}) => true
 ```
 
 ## License
