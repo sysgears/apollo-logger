@@ -1,5 +1,4 @@
-import { print } from 'graphql';
-import { ApolloLink } from 'apollo-link';
+import { ApolloLink, NextLink, Operation, Observable } from 'apollo-link';
 
 function debug(...args) {
   console.log.apply(null, args);
@@ -41,7 +40,7 @@ const addPubSubLogger = pubsub => ({
         try {
           result = await asyncIter.next();
         } finally {
-          debug(JSON.stringify(result), "<= " + trigger + "->next");
+          debug(JSON.stringify(result), '<= ' + trigger + '->next');
         }
         return result;
       },
@@ -50,16 +49,16 @@ const addPubSubLogger = pubsub => ({
         try {
           result = asyncIter.throw(error);
         } finally {
-          debug(trigger + `->throw("${JSON.stringify(error)}") =>`, JSON.stringify(result));
+          debug(trigger + `->throw('${JSON.stringify(error)}') =>`, JSON.stringify(result));
         }
         return result;
-      }
+      },
     });
-  }
+  },
 });
 
 export class LoggingLink extends ApolloLink {
-  request(operation, forward) {
+  request(operation: Operation, forward: NextLink): Observable<any> {
     const observable = forward(operation);
 
     if (observable.map) {
@@ -69,31 +68,41 @@ export class LoggingLink extends ApolloLink {
         return result;
       });
     } else {
-      observable.subscribe(result => {
-        debug(`${JSON.stringify(result)} <= ${formatRequest(operation)}`);
+      return new Observable(observer => {
+        debug(`subscribe <= ${formatRequest(operation)}`);
+        const observerProxy = {
+          next(value) {
+            debug(`${JSON.stringify(value)} <= ${formatRequest(operation)}`);
 
-        return result;
-      });
-      return {
-        subscribe() {
-          debug(`subscribe <= ${formatRequest(operation)}`);
-          const result = observable.subscribe.apply(observable, arguments);
-          return {
-            unsubscribe() {
-              debug(`unsubscribe <= ${formatRequest(operation)}`);
-              return result.unsubscribe.apply(observable, arguments);
+            if (observer.next) {
+              observer.next(value);
             }
-          }
-        },
-      };
+          },
+          error(errorValue) {
+            debug(`${JSON.stringify(errorValue)} <= ${formatRequest(operation)}`);
+
+            if (observer.error) {
+              observer.error(errorValue);
+            }
+          },
+          complete() {
+            debug(`unsubscribe <= ${formatRequest(operation)}`);
+
+            if (observer.complete) {
+              observer.complete();
+            }
+          },
+        };
+        observable.subscribe(observerProxy);
+      });
     }
   }
 }
 
 export const addApolloLogging = obj => {
   if (obj.publish) {
-    return addPubSubLogger(obj)
+    return addPubSubLogger(obj);
   } else {
-    throw new Error("Unknown object passed to Apollo Logger:" + JSON.stringify(obj));
+    throw new Error('Unknown object passed to Apollo Logger:' + JSON.stringify(obj));
   }
 };

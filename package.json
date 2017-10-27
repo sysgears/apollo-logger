@@ -1,6 +1,6 @@
 {
   "name": "apollo-logger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Apollo GraphQL Logger",
   "main": "./lib/bundle.umd.js",
   "module": "./lib/index.js",
@@ -12,7 +12,7 @@
     "bundle": "rollup -c",
     "build": "tsc -p .",
     "watch": "tsc -w",
-    "lint": "tslint 'src/*.ts*' -p tsconfig.json --type-check && tslint 'test/*.ts*' -p tsconfig.json --type-check",
+    "lint": "tslint --fix 'src/*.ts*' -p tsconfig.json --type-check && tslint 'test/*.ts*' -p tsconfig.json --type-check",
     "test": "echo \"Error: no test specified\" && exit 1",
     "minify:browser": "uglifyjs -c -m -o ./lib/bundle.min.js -- ./lib/bundle.js",
     "postbuild": "npm run bundle",
@@ -42,16 +42,17 @@
   "homepage": "https://github.com/sysgears/apollo-logger",
   "devDependencies": {
     "@types/node": "^7.0.18",
-    "apollo-link": "^0.6.1-beta.4",
-    "graphql": "^0.10.5",
+    "@types/zen-observable": "^0.5.3",
+    "apollo-link": "^1.0.0",
+    "graphql": "^0.11.7",
     "rimraf": "^2.6.2",
     "rollup": "^0.50.0",
     "tslint": "^5.2.0",
     "typescript": "^2.3.2"
   },
   "peerDependencies": {
-    "apollo-link": "^0.6.1-beta.4",
-    "graphql": ">=0.10.0"
+    "apollo-link": ">= 0.5.0",
+    "graphql": ">= 0.10.0"
   },
   "dependencies": {
     "debug": "^3.0.1"
