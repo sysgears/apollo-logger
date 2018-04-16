@@ -1,2 +1,6 @@
+/.history
+/.idea
+/.vscode
 node_modules
 lib
+*.log

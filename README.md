@@ -12,15 +12,22 @@ npm install --save-dev apollo-logger
 
 For full logging you will need to attach Apollo Logger to:
 - Apollo Link
+- Apollo Express Server
 - And PubSub
 
 ``` js
-import { LoggingLink, addApolloLogging } from 'apollo-logger';
+import { LoggingLink, addApolloLogging, formatResponse } from 'apollo-logger';
 
 const link = ApolloLink.from([
   new LoggingLink(),
   new HttpLink({uri: ...})
 );
+
+...
+
+app.use('/graphql', bodyParser.json(), graphqlExpress({ schema: myGraphQLSchema, formatResponse });
+
+...
 
 const pubsub = addApolloLogging(new PubSub());
 ```

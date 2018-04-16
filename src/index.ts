@@ -1,4 +1,5 @@
-import { ApolloLink, NextLink, Operation, Observable } from 'apollo-link';
+import { print, getOperationAST } from 'graphql';
+import { ApolloLink, Observable } from 'apollo-link';
 
 function debug(...args) {
   console.log.apply(null, args);
@@ -58,45 +59,40 @@ const addPubSubLogger = pubsub => ({
 });
 
 export class LoggingLink extends ApolloLink {
-  request(operation: Operation, forward: NextLink): Observable<any> {
-    const observable = forward(operation);
-
-    if (observable.map) {
-      return observable.map(result => {
-        debug(`${JSON.stringify(result)} <= ${formatRequest(operation)}`);
-
-        return result;
-      });
-    } else {
-      return new Observable(observer => {
+  request(operation, forward) {
+    const operationAST = getOperationAST(operation.query, operation.operationName);
+    const isSubscription = !!operationAST && operationAST.operation === 'subscription';
+    return new Observable(observer => {
+      if (isSubscription) {
         debug(`subscribe <= ${formatRequest(operation)}`);
-        const observerProxy = {
-          next(value) {
-            debug(`${JSON.stringify(value)} <= ${formatRequest(operation)}`);
+      }
+      const sub = forward(operation).subscribe({
+        next: result => {
+          debug(`${JSON.stringify(result)} <= ${formatRequest(operation)}`);
 
-            if (observer.next) {
-              observer.next(value);
-            }
-          },
-          error(errorValue) {
-            debug(`${JSON.stringify(errorValue)} <= ${formatRequest(operation)}`);
+          observer.next(result);
+        },
+        error: error => {
+          debug(`${JSON.stringify(error)} <=e ${formatRequest(operation)}`);
 
-            if (observer.error) {
-              observer.error(errorValue);
-            }
-          },
-          complete() {
-            debug(`unsubscribe <= ${formatRequest(operation)}`);
-
-            if (observer.complete) {
-              observer.complete();
-            }
-          },
-        };
-        observable.subscribe(observerProxy);
+          observer.error(error);
+        },
+        complete: observer.complete.bind(observer),
       });
-    }
+      return () => {
+        if (isSubscription) {
+          debug(`unsubscribe <= ${formatRequest(operation)}`);
+        }
+        sub.unsubscribe();
+      }
+    });
   }
+}
+
+export const formatResponse = (response, options) => {
+  debug(`${JSON.stringify(response)} <= ${formatRequest(options)}`);
+
+  return response;
 }
 
 export const addApolloLogging = obj => {
