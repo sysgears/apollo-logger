@@ -16,20 +16,22 @@ For full logging you will need to attach Apollo Logger to:
 - And PubSub
 
 ``` js
-import { LoggingLink, addApolloLogging, formatResponse } from 'apollo-logger';
+import { LoggingLink, wrapPubSub, formatResponse } from 'apollo-logger';
+
+const logOptions = { logger: console.log };
 
 const link = ApolloLink.from([
-  new LoggingLink(),
+  new LoggingLink(logOptions),
   new HttpLink({uri: ...})
 );
 
 ...
 
-app.use('/graphql', bodyParser.json(), graphqlExpress({ schema: myGraphQLSchema, formatResponse });
+app.use('/graphql', bodyParser.json(), graphqlExpress({ schema: myGraphQLSchema, formatResponse: formatResponse.bind(logOptions) });
 
 ...
 
-const pubsub = addApolloLogging(new PubSub());
+const pubsub = wrapPubSub(new PubSub(), logOptions);
 ```
 
 ## Sample output
