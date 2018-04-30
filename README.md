@@ -1,5 +1,6 @@
 ## Apollo GraphQL Logger
 
+[![npm version](https://badge.fury.io/js/apollo-logger.svg)](https://badge.fury.io/js/apollo-logger) 
 [![Twitter Follow](https://img.shields.io/twitter/follow/sysgears.svg?style=social)](https://twitter.com/sysgears)
 
 ## Installation
