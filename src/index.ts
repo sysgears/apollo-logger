@@ -1,18 +1,37 @@
 import { ApolloLink, Observable, Operation } from 'apollo-link';
-import { getOperationAST, print } from 'graphql';
+import { getOperationAST } from 'graphql';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { $$asyncIterator } from 'iterall';
 
 export interface LogOptions {
   logger?: (...args: any[]) => void;
-  formatter?: (input: FormatterInput) => string;
+  formatter?: (req: any) => string;
 }
 
-export const defaultFormatter = req =>
-  !req.variables || Object.keys(req.variables).length === 0
+const stripCircular = (circularData: any, seen: any[] | null) => {
+  const notCircularData = Array.isArray(circularData) ? [] : {};
+  seen = seen || [];
+  seen.push(circularData);
+
+  Object.getOwnPropertyNames(circularData).forEach(key => {
+    if (!circularData[key] || (typeof circularData[key] !== 'object' && !Array.isArray(circularData[key]))) {
+      notCircularData[key] = circularData[key];
+    } else if (seen.indexOf(circularData[key]) < 0) {
+      notCircularData[key] = stripCircular(circularData[key], seen.slice(0));
+    } else {
+      notCircularData[key] = '[Circular]';
+    }
+  });
+
+  return notCircularData;
+};
+
+export function defaultFormatter(req: any): string {
+  return !req.variables || Object.keys(req.variables).length === 0
     ? req.operationName
     : `${req.operationName}(${JSON.stringify(req.variables)})`;
-
+}
+// tslint:disable-next-line
 export const defaultLogger = (...args: any[]): void => console.log.apply(null, args);
 
 const getDefaultLogOptions = (options: LogOptions): LogOptions => {
@@ -35,7 +54,7 @@ export class LoggedPubSub implements PubSubEngine {
     this.options = getDefaultLogOptions(options);
   }
 
-  public publish(triggerName: string, payload: any): boolean {
+  public publish(triggerName: string, payload: any) {
     this.options.logger('pubsub publish', triggerName, payload);
     return this.pubsub.publish(triggerName, payload);
   }
@@ -124,6 +143,9 @@ export class LoggingLink extends ApolloLink {
   public request(operation, forward) {
     const operationAST = getOperationAST(operation.query, operation.operationName);
     const isSubscription = !!operationAST && operationAST.operation === 'subscription';
+    if (!isSubscription) {
+      this.options.logger(`loading <= ${this.options.formatter(operation)}`);
+    }
     return new Observable(observer => {
       if (isSubscription) {
         this.options.logger(`subscribe <= ${this.options.formatter(operation)}`);
@@ -157,12 +179,12 @@ export interface FormatterInput {
   error?: any;
 }
 
-export const formatResponse = (logOptions: LogOptions, response: any, options: any) => {
+export function formatResponse(logOptions: LogOptions, response: any, ...options: any) {
   const logOpts = getDefaultLogOptions(logOptions);
-  logOpts.logger(`${JSON.stringify(response)} <= ${logOpts.formatter(options)}`);
+  logOpts.logger(`${JSON.stringify(response)} <= ${logOpts.formatter(options[0])}`);
 
   return response;
-};
+}
 
 export default (options?: LogOptions) => ({
   link: new LoggingLink(options),
