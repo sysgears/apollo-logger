@@ -97,7 +97,7 @@ class PubSubAsyncIterator<T> implements AsyncIterator<T> {
   public async next(value?: any): Promise<IteratorResult<T>> {
     let result;
     try {
-      result = await this.asyncIter.next();
+      result = await this.asyncIter.next(value);
     } finally {
       this.options.logger(JSON.stringify(result), '<= ' + JSON.stringify(this.triggers) + '->next');
     }
@@ -107,9 +107,9 @@ class PubSubAsyncIterator<T> implements AsyncIterator<T> {
   public async return?(value?: any): Promise<IteratorResult<T>> {
     let result;
     try {
-      result = await this.asyncIter.next();
+      result = await this.asyncIter.return(value);
     } finally {
-      this.options.logger(JSON.stringify(result), '<= ' + JSON.stringify(this.triggers) + '->next');
+      this.options.logger(JSON.stringify(result), '<= ' + JSON.stringify(this.triggers) + '->return');
     }
     return result;
   }
